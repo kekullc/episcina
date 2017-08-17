@@ -225,7 +225,9 @@ external_owner_exit(Pid, State0 = #state{close_fun = CloseFun,
                                          working = Working}) ->
     %% Requestor we are monitoring went down. Kill the associated
     %% connection, as it might be in an unknown state.
-    dict:fold(fun(C, {_, PossiblePid}, State1) ->
+    dict:fold(fun(C, _, State1) when C =:= Pid ->
+                      cleanup_connection(C, State1);
+                 (C, {_, PossiblePid}, State1) ->
                       case Pid of
                           PossiblePid ->
                               CloseFun(C),
